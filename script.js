@@ -1,4 +1,4 @@
-import { db } from './firebase.js';
+import app, { db } from './firebase.js';
 
 import {
     collection,
@@ -7,116 +7,229 @@ import {
     updateDoc,
     deleteDoc,
     doc,
-    onSnapshot
+    onSnapshot,
+    Timestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const roundsTableBody = document.getElementById('rounds-table-body');
-const playerCards = document.getElementById('player-cards');
-const addRoundButton = document.getElementById('add-round');
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+// =========================
+// AUTH
+// =========================
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+const allowedEmails = [
+
+    "you@gmail.com",
+    "friend1@gmail.com",
+    "friend2@gmail.com"
+
+];
+
+// =========================
+// DOM
+// =========================
+
+const loginScreen =
+    document.getElementById('login-screen');
+
+const appContainer =
+    document.getElementById('app');
+
+const googleLoginButton =
+    document.getElementById('google-login');
+
+const logoutButton =
+    document.getElementById('logout-btn');
+
+const roundsTableBody =
+    document.getElementById('rounds-table-body');
+
+const playerCards =
+    document.getElementById('player-cards');
+
+const addRoundButton =
+    document.getElementById('add-round');
+
+// =========================
+// STATE
+// =========================
 
 let players = {};
+
 let rounds = [];
 
+// =========================
+// LOGIN
+// =========================
 
-function formatDate(dateValue) {
+googleLoginButton.addEventListener(
+    'click',
+    async () => {
 
-    if (!dateValue) return '-';
+        try {
 
-    try {
-
-        // Firestore Timestamp
-        if (typeof dateValue.toDate === 'function') {
-
-            return dateValue.toDate().toLocaleDateString(
-                'en-CA',
-                {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                }
+            await signInWithPopup(
+                auth,
+                provider
             );
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert('Login failed');
         }
-
-        // plain string fallback
-        return new Date(dateValue).toLocaleDateString(
-            'en-CA',
-            {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            }
-        );
-
-    } catch (err) {
-
-        console.error('Date formatting error:', err);
-
-        return '-';
     }
-}
+);
 
+// =========================
+// LOGOUT
+// =========================
+
+logoutButton.addEventListener(
+    'click',
+    async () => {
+
+        await signOut(auth);
+    }
+);
+
+// =========================
+// AUTH STATE
+// =========================
+
+onAuthStateChanged(auth, async user => {
+
+    if (!user) {
+
+        loginScreen.classList.remove('hidden');
+
+        appContainer.classList.add('hidden');
+
+        return;
+    }
+
+    if (!allowedEmails.includes(user.email)) {
+
+        alert('Not authorized');
+
+        await signOut(auth);
+
+        return;
+    }
+
+    loginScreen.classList.add('hidden');
+
+    appContainer.classList.remove('hidden');
+
+    console.log('Logged in:', user.email);
+
+    await loadPlayers();
+
+    listenForRounds();
+});
+
+// =========================
 // LOAD PLAYERS
+// =========================
+
 async function loadPlayers() {
 
-    const snapshot = await getDocs(collection(db, 'players'));
+    players = {};
+
+    const snapshot =
+        await getDocs(collection(db, 'players'));
 
     snapshot.forEach(docSnap => {
 
         players[docSnap.id] = {
+
             id: docSnap.id,
+
             ...docSnap.data()
         };
     });
 
+    console.log('PLAYERS:', players);
+
     renderPlayerCards();
 }
 
+// =========================
 // REALTIME ROUNDS
+// =========================
+
 function listenForRounds() {
 
-    onSnapshot(collection(db, 'rounds'), snapshot => {
+    onSnapshot(
+        collection(db, 'rounds'),
+        snapshot => {
 
-        rounds = [];
+            rounds = [];
 
-        snapshot.forEach(docSnap => {
+            snapshot.forEach(docSnap => {
 
-            rounds.push({
-                id: docSnap.id,
-                ...docSnap.data()
+                rounds.push({
+
+                    id: docSnap.id,
+
+                    ...docSnap.data()
+                });
             });
-        });
 
-        updateTable();
-        renderPlayerCards();
-    });
+            console.log('ROUNDS:', rounds);
+
+            updateTable();
+
+            renderPlayerCards();
+        }
+    );
 }
 
+// =========================
 // PLAYER CARDS
+// =========================
+
 function renderPlayerCards() {
 
     playerCards.innerHTML = '';
 
-    // no players yet
-    if (!players || Object.keys(players).length === 0) {
+    if (
+        !players ||
+        Object.keys(players).length === 0
+    ) {
         return;
     }
 
     Object.values(players).forEach(player => {
 
-        // safe round filtering
         const playerRounds = rounds.filter(round =>
             round &&
             round.name === player.id
         );
 
-        // safe holes total
-        const used = playerRounds.reduce((sum, round) => {
+        const used = playerRounds.reduce(
+            (sum, round) => {
 
-            const holes = parseInt(round.holes);
+                const holes =
+                    parseInt(round.holes);
 
-            return sum + (isNaN(holes) ? 0 : holes);
+                return sum +
+                    (isNaN(holes) ? 0 : holes);
 
-        }, 0);
+            },
+            0
+        );
 
         const totalHoles =
             parseInt(player.totalHoles) || 180;
@@ -129,7 +242,8 @@ function renderPlayerCards() {
             100
         );
 
-        const card = document.createElement('div');
+        const card =
+            document.createElement('div');
 
         card.className = 'stat-card';
 
@@ -165,66 +279,85 @@ function renderPlayerCards() {
             </div>
 
             <div class="progress-track">
+
                 <div
                     class="progress-fill"
                     style="width:${percent}%"
                 ></div>
+
             </div>
         `;
 
-        card.addEventListener('click', async () => {
+        card.addEventListener(
+            'click',
+            async () => {
 
-            const newTotal = prompt(
-                `Update total holes for ${player.id}`,
-                totalHoles
-            );
+                const newTotal = prompt(
+                    `Update total holes for ${player.id}`,
+                    totalHoles
+                );
 
-            if (!newTotal) return;
+                if (!newTotal) return;
 
-            const parsed = parseInt(newTotal);
+                const parsed =
+                    parseInt(newTotal);
 
-            if (isNaN(parsed)) return;
+                if (isNaN(parsed)) return;
 
-            await updateDoc(
-                doc(db, 'players', player.id),
-                {
-                    totalHoles: parsed
-                }
-            );
+                await updateDoc(
+                    doc(
+                        db,
+                        'players',
+                        player.id
+                    ),
+                    {
+                        totalHoles: parsed
+                    }
+                );
 
-            players[player.id].totalHoles = parsed;
+                players[player.id].totalHoles =
+                    parsed;
 
-            renderPlayerCards();
-        });
+                renderPlayerCards();
+            }
+        );
 
         playerCards.appendChild(card);
     });
 }
 
+// =========================
 // TABLE
+// =========================
+
 function updateTable() {
 
     roundsTableBody.innerHTML = '';
 
-    const sorted = [...rounds].sort((a, b) => {
-
-        const aTime = getTimestampValue(a.date);
-        const bTime = getTimestampValue(b.date);
-
-        return bTime - aTime;
-    });
+    const sorted = [...rounds].sort(
+        (a, b) =>
+            getTimestampValue(b.date) -
+            getTimestampValue(a.date)
+    );
 
     sorted.forEach(round => {
 
-        const row = document.createElement('tr');
+        const row =
+            document.createElement('tr');
 
         row.innerHTML = `
             <td>${round.name || '-'}</td>
-            <td>${formatDate(round.date)}</td>
+
+            <td>
+                ${formatDate(round.date)}
+            </td>
+
             <td>${round.holes || 0}</td>
+
             <td>${round.comments || '-'}</td>
 
             <td>
+
                 <div class="flex gap-2">
 
                     <button
@@ -242,6 +375,7 @@ function updateTable() {
                     </button>
 
                 </div>
+
             </td>
         `;
 
@@ -251,67 +385,204 @@ function updateTable() {
     bindActionButtons();
 }
 
+// =========================
 // ACTION BUTTONS
+// =========================
+
 function bindActionButtons() {
 
-    document.querySelectorAll('.delete-btn').forEach(btn => {
+    document
+        .querySelectorAll('.delete-btn')
+        .forEach(btn => {
 
-        btn.addEventListener('click', async () => {
+            btn.addEventListener(
+                'click',
+                async () => {
 
-            const id = btn.dataset.id;
+                    const id =
+                        btn.dataset.id;
 
-            if (!confirm('Delete this round?')) return;
+                    if (
+                        !confirm(
+                            'Delete this round?'
+                        )
+                    ) {
+                        return;
+                    }
 
-            await deleteDoc(doc(db, 'rounds', id));
-        });
-    });
-
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-
-        btn.addEventListener('click', async () => {
-
-            const id = btn.dataset.id;
-
-            const round = rounds.find(r => r.id === id);
-
-            const newHoles = prompt(
-                'Update holes',
-                round.holes
+                    await deleteDoc(
+                        doc(db, 'rounds', id)
+                    );
+                }
             );
-
-            if (!newHoles) return;
-
-            await updateDoc(doc(db, 'rounds', id), {
-                holes: parseInt(newHoles)
-            });
         });
-    });
+
+    document
+        .querySelectorAll('.edit-btn')
+        .forEach(btn => {
+
+            btn.addEventListener(
+                'click',
+                async () => {
+
+                    const id =
+                        btn.dataset.id;
+
+                    const round =
+                        rounds.find(
+                            r => r.id === id
+                        );
+
+                    const newHoles = prompt(
+                        'Update holes',
+                        round.holes
+                    );
+
+                    if (!newHoles) return;
+
+                    const parsed =
+                        parseInt(newHoles);
+
+                    if (isNaN(parsed)) return;
+
+                    await updateDoc(
+                        doc(db, 'rounds', id),
+                        {
+                            holes: parsed
+                        }
+                    );
+                }
+            );
+        });
 }
 
+// =========================
 // ADD ROUND
-addRoundButton.addEventListener('click', async () => {
+// =========================
 
-    const name = document.getElementById('name').value;
-    const date = document.getElementById('date').value;
-    const holes = parseInt(document.getElementById('holes').value);
-    const comments = document.getElementById('comments').value;
+addRoundButton.addEventListener(
+    'click',
+    async () => {
 
-    if (!name || !date || isNaN(holes)) {
-        alert('Please complete all fields');
-        return;
+        const name =
+            document.getElementById('name').value;
+
+        const date =
+            document.getElementById('date').value;
+
+        const holes = parseInt(
+            document.getElementById('holes').value
+        );
+
+        const comments =
+            document.getElementById('comments').value;
+
+        if (
+            !name ||
+            !date ||
+            isNaN(holes)
+        ) {
+
+            alert(
+                'Please complete all fields'
+            );
+
+            return;
+        }
+
+        await addDoc(
+            collection(db, 'rounds'),
+            {
+
+                name,
+
+                date: Timestamp.fromDate(
+                    new Date(date)
+                ),
+
+                holes,
+
+                comments
+            }
+        );
+
+        document.getElementById('holes').value =
+            '';
+
+        document.getElementById('comments').value =
+            '';
     }
+);
 
-    await addDoc(collection(db, 'rounds'), {
-        name,
-        date,
-        holes,
-        comments
-    });
+// =========================
+// DATE HELPERS
+// =========================
 
-    document.getElementById('holes').value = '';
-    document.getElementById('comments').value = '';
-});
+function formatDate(dateValue) {
 
-// INIT
-await loadPlayers();
-listenForRounds();
+    if (!dateValue) return '-';
+
+    try {
+
+        if (
+            typeof dateValue.toDate ===
+            'function'
+        ) {
+
+            return dateValue
+                .toDate()
+                .toLocaleDateString(
+                    'en-CA',
+                    {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    }
+                );
+        }
+
+        return new Date(dateValue)
+            .toLocaleDateString(
+                'en-CA',
+                {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                }
+            );
+
+    } catch (err) {
+
+        console.error(
+            'Date formatting error:',
+            err
+        );
+
+        return '-';
+    }
+}
+
+function getTimestampValue(dateValue) {
+
+    if (!dateValue) return 0;
+
+    try {
+
+        if (
+            typeof dateValue.toDate ===
+            'function'
+        ) {
+
+            return dateValue
+                .toDate()
+                .getTime();
+        }
+
+        return new Date(dateValue)
+            .getTime();
+
+    } catch {
+
+        return 0;
+    }
+}

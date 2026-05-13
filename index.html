@@ -1,98 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    />
 
     <title>Golf Tracker</title>
 
-    <link rel="stylesheet" href="dist/output.css" />
+    <link
+        rel="stylesheet"
+        href="dist/output.css"
+    />
+
 </head>
 
 <body>
 
-    <div class="page-container">
+    <!-- LOGIN SCREEN -->
+    <div
+        id="login-screen"
+        class="min-h-screen flex items-center justify-center p-6"
+    >
 
-        <div>
-            <h1 class="text-5xl font-black text-white">
+        <div class="section-card max-w-md w-full text-center">
+
+            <h1 class="text-4xl font-black mb-3">
                 Golf Tracker
             </h1>
 
-            <p class="text-gray-400 mt-2 text-lg">
-                Track rounds and remaining holes.
+            <p class="text-gray-400 mb-8">
+                Sign in to continue
             </p>
-        </div>
 
-        <!-- PLAYER CARDS -->
-        <div id="player-cards" class="grid gap-4 md:grid-cols-3"></div>
-
-        <!-- ADD ROUND -->
-        <div class="section-card">
-
-            <h2 class="text-2xl font-bold mb-6">
-                Add Round
-            </h2>
-
-            <div class="grid gap-4 md:grid-cols-2">
-
-                <div>
-                    <label>Player</label>
-                    <select id="name" class="input">
-                        <option>Andy</option>
-                        <option>Scott</option>
-                        <option>Stew</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label>Date</label>
-                    <input type="date" id="date" class="input" />
-                </div>
-
-                <div>
-                    <label>Holes</label>
-                    <input type="number" id="holes" class="input" min="1" max="18" />
-                </div>
-
-                <div>
-                    <label>Comments</label>
-                    <input type="text" id="comments" class="input" />
-                </div>
-
-            </div>
-
-            <button id="add-round" class="btn-primary mt-6">
-                Add Round
+            <button
+                id="google-login"
+                class="btn-primary w-full"
+            >
+                Sign In With Google
             </button>
 
         </div>
 
-        <!-- ROUNDS -->
-        <div class="section-card">
+    </div>
 
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold">
-                    Rounds
-                </h2>
+    <!-- APP -->
+    <div
+        id="app"
+        class="hidden"
+    >
+
+        <div class="page-container">
+
+            <!-- HEADER -->
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <h1 class="text-5xl font-black text-white">
+                        Golf Tracker
+                    </h1>
+
+                    <p class="text-gray-400 mt-2 text-lg">
+                        Track rounds and remaining holes.
+                    </p>
+
+                </div>
+
+                <button
+                    id="logout-btn"
+                    class="action-btn"
+                >
+                    Logout
+                </button>
+
             </div>
 
-            <div class="table-shell">
+            <!-- PLAYER CARDS -->
+            <div
+                id="player-cards"
+                class="grid gap-4 md:grid-cols-3"
+            ></div>
 
-                <table class="table-base">
+            <!-- ADD ROUND -->
+            <div class="section-card">
 
-                    <thead>
-                        <tr>
-                            <th>Player</th>
-                            <th>Date</th>
-                            <th>Holes</th>
-                            <th>Comments</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+                <h2 class="text-2xl font-bold mb-6">
+                    Add Round
+                </h2>
 
-                    <tbody id="rounds-table-body"></tbody>
+                <div class="grid gap-4 md:grid-cols-2">
 
-                </table>
+                    <div>
+
+                        <label for="name">
+                            Player
+                        </label>
+
+                        <select
+                            id="name"
+                            class="input"
+                        >
+                            <option>Andy</option>
+                            <option>Scott</option>
+                            <option>Stew</option>
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label for="date">
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="date"
+                            class="input"
+                        />
+
+                    </div>
+
+                    <div>
+
+                        <label for="holes">
+                            Holes
+                        </label>
+
+                        <input
+                            type="number"
+                            id="holes"
+                            class="input"
+                            min="1"
+                            max="18"
+                        />
+
+                    </div>
+
+                    <div>
+
+                        <label for="comments">
+                            Comments
+                        </label>
+
+                        <input
+                            type="text"
+                            id="comments"
+                            class="input"
+                        />
+
+                    </div>
+
+                </div>
+
+                <button
+                    id="add-round"
+                    class="btn-primary mt-6"
+                >
+                    Add Round
+                </button>
+
+            </div>
+
+            <!-- ROUNDS -->
+            <div class="section-card">
+
+                <div class="flex items-center justify-between mb-6">
+
+                    <h2 class="text-2xl font-bold">
+                        Rounds
+                    </h2>
+
+                </div>
+
+                <div class="table-shell">
+
+                    <table class="table-base">
+
+                        <thead>
+
+                            <tr>
+                                <th>Player</th>
+                                <th>Date</th>
+                                <th>Holes</th>
+                                <th>Comments</th>
+                                <th>Actions</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="rounds-table-body"></tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 
@@ -100,7 +206,11 @@
 
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script
+        type="module"
+        src="script.js"
+    ></script>
 
 </body>
+
 </html>
