@@ -17,6 +17,44 @@ const addRoundButton = document.getElementById('add-round');
 let players = {};
 let rounds = [];
 
+
+function formatDate(dateValue) {
+
+    if (!dateValue) return '-';
+
+    try {
+
+        // Firestore Timestamp
+        if (typeof dateValue.toDate === 'function') {
+
+            return dateValue.toDate().toLocaleDateString(
+                'en-CA',
+                {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                }
+            );
+        }
+
+        // plain string fallback
+        return new Date(dateValue).toLocaleDateString(
+            'en-CA',
+            {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            }
+        );
+
+    } catch (err) {
+
+        console.error('Date formatting error:', err);
+
+        return '-';
+    }
+}
+
 // LOAD PLAYERS
 async function loadPlayers() {
 
@@ -58,16 +96,36 @@ function renderPlayerCards() {
 
     playerCards.innerHTML = '';
 
+    // no players yet
+    if (!players || Object.keys(players).length === 0) {
+        return;
+    }
+
     Object.values(players).forEach(player => {
 
-        const used = rounds
-            .filter(r => r.name === player.id)
-            .reduce((sum, r) => sum + r.holes, 0);
+        // safe round filtering
+        const playerRounds = rounds.filter(round =>
+            round &&
+            round.name === player.id
+        );
 
-        const remaining = player.totalHoles - used;
+        // safe holes total
+        const used = playerRounds.reduce((sum, round) => {
+
+            const holes = parseInt(round.holes);
+
+            return sum + (isNaN(holes) ? 0 : holes);
+
+        }, 0);
+
+        const totalHoles =
+            parseInt(player.totalHoles) || 180;
+
+        const remaining =
+            totalHoles - used;
 
         const percent = Math.min(
-            (used / player.totalHoles) * 100,
+            (used / totalHoles) * 100,
             100
         );
 
@@ -79,6 +137,7 @@ function renderPlayerCards() {
             <div class="flex items-start justify-between">
 
                 <div>
+
                     <div class="stat-title">
                         ${player.id} Remaining
                     </div>
@@ -88,18 +147,28 @@ function renderPlayerCards() {
                     </div>
 
                     <div class="text-sm text-gray-400 mt-1">
-                        ${used} / ${player.totalHoles} used
+                        ${used} / ${totalHoles} used
                     </div>
+
                 </div>
 
-                <div class="h-12 w-12 rounded-full bg-green-500/20 border border-green-400/20 flex items-center justify-center font-bold text-green-300">
+                <div
+                    class="h-12 w-12 rounded-full
+                    bg-green-500/20
+                    border border-green-400/20
+                    flex items-center justify-center
+                    font-bold text-green-300"
+                >
                     ${player.id[0]}
                 </div>
 
             </div>
 
             <div class="progress-track">
-                <div class="progress-fill" style="width:${percent}%"></div>
+                <div
+                    class="progress-fill"
+                    style="width:${percent}%"
+                ></div>
             </div>
         `;
 
@@ -107,19 +176,23 @@ function renderPlayerCards() {
 
             const newTotal = prompt(
                 `Update total holes for ${player.id}`,
-                player.totalHoles
+                totalHoles
             );
 
             if (!newTotal) return;
 
+            const parsed = parseInt(newTotal);
+
+            if (isNaN(parsed)) return;
+
             await updateDoc(
                 doc(db, 'players', player.id),
                 {
-                    totalHoles: parseInt(newTotal)
+                    totalHoles: parsed
                 }
             );
 
-            players[player.id].totalHoles = parseInt(newTotal);
+            players[player.id].totalHoles = parsed;
 
             renderPlayerCards();
         });
@@ -133,17 +206,24 @@ function updateTable() {
 
     roundsTableBody.innerHTML = '';
 
-    const sorted = [...rounds].reverse();
+    const sorted = [...rounds].sort((a, b) => {
+
+        const aTime = getTimestampValue(a.date);
+        const bTime = getTimestampValue(b.date);
+
+        return bTime - aTime;
+    });
 
     sorted.forEach(round => {
 
         const row = document.createElement('tr');
 
         row.innerHTML = `
-            <td>${round.name}</td>
-            <td>${round.date}</td>
-            <td>${round.holes}</td>
+            <td>${round.name || '-'}</td>
+            <td>${formatDate(round.date)}</td>
+            <td>${round.holes || 0}</td>
             <td>${round.comments || '-'}</td>
+
             <td>
                 <div class="flex gap-2">
 
