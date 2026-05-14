@@ -110,83 +110,82 @@ function renderApp(user) {
     root.innerHTML = `
 
         <div class="page-container">
-        <!-- Header -->
-        <div
-            class="
-                flex
-                flex-col
-                gap-6
-                md:flex-row
-                md:items-start
-                md:justify-between
-            "
-        >
-
-            <!-- LEFT -->
-            <div class="min-w-0">
-
-                <h1
-                    class="
-                        text-5xl
-                        md:text-6xl
-                        font-black
-                        text-white
-                        leading-none
-                    "
-                >
-                    BrewNello
-                    <br />
-                    Tracker
-                </h1>
-
-                <p
-                    class="
-                        text-gray-400
-                        mt-4
-                        text-xl
-                        max-w-md
-                    "
-                >
-                    Track rounds and remaining holes.
-                </p>
-
-            </div>
-
-            <!-- RIGHT -->
+        <!-- HEADER -->
             <div
                 class="
                     flex
                     flex-col
-                    items-start
-                    gap-3
-                    md:items-end
-                    shrink-0
+                    gap-6
+                    lg:flex-row
+                    lg:items-start
+                    lg:justify-between
                 "
             >
 
-                <div
-                    class="
-                        text-sm
-                        text-gray-400
-                        break-all
-                        text-left
-                        md:text-right
-                        max-w-[220px]
-                    "
-                >
-                    ${user.email}
+                <!-- LEFT -->
+                <div>
+
+                    <h1
+                        class="
+                            text-5xl
+                            md:text-6xl
+                            font-black
+                            text-white
+                            leading-none
+                        "
+                    >
+                        BrewNello
+                        <br />
+                        Tracker
+                    </h1>
+
+                    <p
+                        class="
+                            text-gray-400
+                            mt-4
+                            text-xl
+                            max-w-md
+                        "
+                    >
+                        Track rounds and remaining holes.
+                    </p>
+
                 </div>
 
-                <button
-                    id="logout-btn"
-                    class="action-btn"
+                <!-- RIGHT -->
+                <div
+                    class="
+                        flex
+                        flex-col
+                        items-start
+                        gap-3
+                        lg:items-end
+                    "
                 >
-                    Logout
-                </button>
+
+                    <div
+                        class="
+                            text-sm
+                            text-gray-400
+                            break-all
+                            max-w-full
+                            lg:max-w-[260px]
+                            lg:text-right
+                        "
+                    >
+                        ${user.email}
+                    </div>
+
+                    <button
+                        id="logout-btn"
+                        class="action-btn"
+                    >
+                        Logout
+                    </button>
+
+                </div>
 
             </div>
-
-        </div>
 
             <!-- PLAYER CARDS -->
             <div
