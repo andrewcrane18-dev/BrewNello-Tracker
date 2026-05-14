@@ -59,7 +59,7 @@ function renderLogin() {
             >
 
                 <h1 class="text-4xl font-black mb-3">
-                    Golf Tracker
+                    BrewNello Tracker
                 </h1>
 
                 <p class="text-gray-400 mb-8">
@@ -119,7 +119,7 @@ function renderApp(user) {
                     <h1
                         class="text-5xl font-black text-white"
                     >
-                        Golf Tracker
+                        BrewNello Tracker
                     </h1>
 
                     <p
