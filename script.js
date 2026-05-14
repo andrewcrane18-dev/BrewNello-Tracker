@@ -110,69 +110,83 @@ function renderApp(user) {
     root.innerHTML = `
 
         <div class="page-container">
+        <!-- Header -->
+        <div
+            class="
+                flex
+                flex-col
+                gap-6
+                md:flex-row
+                md:items-start
+                md:justify-between
+            "
+        >
 
-            <!-- HEADER -->
+            <!-- LEFT -->
+            <div class="min-w-0">
+
+                <h1
+                    class="
+                        text-5xl
+                        md:text-6xl
+                        font-black
+                        text-white
+                        leading-none
+                    "
+                >
+                    BrewNello
+                    <br />
+                    Tracker
+                </h1>
+
+                <p
+                    class="
+                        text-gray-400
+                        mt-4
+                        text-xl
+                        max-w-md
+                    "
+                >
+                    Track rounds and remaining holes.
+                </p>
+
+            </div>
+
+            <!-- RIGHT -->
             <div
                 class="
                     flex
                     flex-col
-                    gap-6
-                    md:flex-row
-                    md:items-center
-                    md:justify-between
+                    items-start
+                    gap-3
+                    md:items-end
+                    shrink-0
                 "
             >
 
-                <div>
-
-                    <h1
-                        class="text-5xl font-black text-white"
-                    >
-                        BrewNello Tracker
-                    </h1>
-
-                    <p
-                        class="text-gray-400 mt-2 text-lg"
-                    >
-                        Track rounds and remaining holes.
-                    </p>
-
-                </div>
-
                 <div
                     class="
-                        flex
-                        flex-col
-                        items-start
-                        gap-3
-                        sm:flex-row
-                        sm:items-center
-                        min-w-0
-                        w-full
-                        md:w-auto
+                        text-sm
+                        text-gray-400
+                        break-all
+                        text-left
+                        md:text-right
+                        max-w-[220px]
                     "
                 >
-                    <div
-                        class="
-                            text-sm
-                            text-gray-400
-                            break-all
-                            max-w-full
-                            min-w-0
-                        "
-                    >
-                        ${user.email}
-                    </div>
-                    <button
-                        id="logout-btn"
-                        class="action-btn"
-                    >
-                        Logout
-                    </button>
-
+                    ${user.email}
                 </div>
 
+                <button
+                    id="logout-btn"
+                    class="action-btn"
+                >
+                    Logout
+                </button>
+
             </div>
+
+        </div>
 
             <!-- PLAYER CARDS -->
             <div
