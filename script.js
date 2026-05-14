@@ -112,7 +112,16 @@ function renderApp(user) {
         <div class="page-container">
 
             <!-- HEADER -->
-            <div class="flex items-center justify-between">
+            <div
+                class="
+                    flex
+                    flex-col
+                    gap-6
+                    md:flex-row
+                    md:items-center
+                    md:justify-between
+                "
+            >
 
                 <div>
 
@@ -130,9 +139,23 @@ function renderApp(user) {
 
                 </div>
 
-                <div class="flex items-center gap-4">
-
-                    <div class="text-sm text-gray-400">
+                <div
+                    class="
+                        flex
+                        flex-col
+                        items-start
+                        gap-3
+                        sm:flex-row
+                        sm:items-center
+                    "
+                >
+                    <div
+                        class="
+                            text-sm
+                            text-gray-400
+                            break-all
+                        "
+                    >
                         ${user.email}
                     </div>
 
