@@ -27,38 +27,12 @@ const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
 
-const allowedEmails = [
-
-    "you@gmail.com",
-    "friend1@gmail.com",
-    "friend2@gmail.com"
-
-];
-
 // =========================
-// DOM
+// ROOT
 // =========================
 
-const loginScreen =
-    document.getElementById('login-screen');
-
-const appContainer =
-    document.getElementById('app');
-
-const googleLoginButton =
-    document.getElementById('google-login');
-
-const logoutButton =
-    document.getElementById('logout-btn');
-
-const roundsTableBody =
-    document.getElementById('rounds-table-body');
-
-const playerCards =
-    document.getElementById('player-cards');
-
-const addRoundButton =
-    document.getElementById('add-round');
+const root =
+    document.getElementById('root');
 
 // =========================
 // STATE
@@ -69,40 +43,267 @@ let players = {};
 let rounds = [];
 
 // =========================
-// LOGIN
+// RENDER LOGIN
 // =========================
 
-googleLoginButton.addEventListener(
-    'click',
-    async () => {
+function renderLogin() {
 
-        try {
+    root.innerHTML = `
 
-            await signInWithPopup(
-                auth,
-                provider
-            );
+        <div
+            class="min-h-screen flex items-center justify-center p-6"
+        >
 
-        } catch (err) {
+            <div
+                class="section-card max-w-md w-full text-center"
+            >
 
-            console.error(err);
+                <h1 class="text-4xl font-black mb-3">
+                    Golf Tracker
+                </h1>
 
-            alert('Login failed');
-        }
-    }
-);
+                <p class="text-gray-400 mb-8">
+                    Sign in to continue
+                </p>
+
+                <button
+                    id="google-login"
+                    class="btn-primary w-full"
+                >
+                    Sign In With Google
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    document
+        .getElementById('google-login')
+        .addEventListener(
+            'click',
+            async () => {
+
+                try {
+
+                    await signInWithPopup(
+                        auth,
+                        provider
+                    );
+
+                } catch (err) {
+
+                    console.error(err);
+
+                    alert('Login failed');
+                }
+            }
+        );
+}
 
 // =========================
-// LOGOUT
+// RENDER APP
 // =========================
 
-logoutButton.addEventListener(
-    'click',
-    async () => {
+function renderApp(user) {
 
-        await signOut(auth);
-    }
-);
+    root.innerHTML = `
+
+        <div class="page-container">
+
+            <!-- HEADER -->
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <h1
+                        class="text-5xl font-black text-white"
+                    >
+                        Golf Tracker
+                    </h1>
+
+                    <p
+                        class="text-gray-400 mt-2 text-lg"
+                    >
+                        Track rounds and remaining holes.
+                    </p>
+
+                </div>
+
+                <div class="flex items-center gap-4">
+
+                    <div class="text-sm text-gray-400">
+                        ${user.email}
+                    </div>
+
+                    <button
+                        id="logout-btn"
+                        class="action-btn"
+                    >
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- PLAYER CARDS -->
+            <div
+                id="player-cards"
+                class="grid gap-4 md:grid-cols-3"
+            ></div>
+
+            <!-- ADD ROUND -->
+            <div class="section-card">
+
+                <h2 class="text-2xl font-bold mb-6">
+                    Add Round
+                </h2>
+
+                <div
+                    class="grid gap-4 md:grid-cols-2"
+                >
+
+                    <div>
+
+                        <label>
+                            Player
+                        </label>
+
+                        <select
+                            id="name"
+                            class="input"
+                        >
+                            <option>Andy</option>
+                            <option>Scott</option>
+                            <option>Stew</option>
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label>
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="date"
+                            class="input"
+                        />
+
+                    </div>
+
+                    <div>
+
+                        <label>
+                            Holes
+                        </label>
+
+                        <input
+                            type="number"
+                            id="holes"
+                            class="input"
+                            min="1"
+                            max="18"
+                        />
+
+                    </div>
+
+                    <div>
+
+                        <label>
+                            Comments
+                        </label>
+
+                        <input
+                            type="text"
+                            id="comments"
+                            class="input"
+                        />
+
+                    </div>
+
+                </div>
+
+                <button
+                    id="add-round"
+                    class="btn-primary mt-6"
+                >
+                    Add Round
+                </button>
+
+            </div>
+
+            <!-- ROUNDS -->
+            <div class="section-card">
+
+                <h2
+                    class="text-2xl font-bold mb-6"
+                >
+                    Rounds
+                </h2>
+
+                <div class="table-shell">
+
+                    <table class="table-base">
+
+                        <thead>
+
+                            <tr>
+                                <th>Player</th>
+                                <th>Date</th>
+                                <th>Holes</th>
+                                <th>Comments</th>
+                                <th>Actions</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody
+                            id="rounds-table-body"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    bindAppEvents();
+
+    loadPlayers();
+
+    listenForRounds();
+}
+
+// =========================
+// APP EVENTS
+// =========================
+
+function bindAppEvents() {
+
+    document
+        .getElementById('logout-btn')
+        .addEventListener(
+            'click',
+            async () => {
+
+                await signOut(auth);
+            }
+        );
+
+    document
+        .getElementById('add-round')
+        .addEventListener(
+            'click',
+            addRound
+        );
+}
 
 // =========================
 // AUTH STATE
@@ -112,31 +313,12 @@ onAuthStateChanged(auth, async user => {
 
     if (!user) {
 
-        loginScreen.classList.remove('hidden');
-
-        appContainer.classList.add('hidden');
+        renderLogin();
 
         return;
     }
 
-    if (!allowedEmails.includes(user.email)) {
-
-        alert('Not authorized');
-
-        await signOut(auth);
-
-        return;
-    }
-
-    loginScreen.classList.add('hidden');
-
-    appContainer.classList.remove('hidden');
-
-    console.log('Logged in:', user.email);
-
-    await loadPlayers();
-
-    listenForRounds();
+    renderApp(user);
 });
 
 // =========================
@@ -145,24 +327,37 @@ onAuthStateChanged(auth, async user => {
 
 async function loadPlayers() {
 
-    players = {};
+    try {
 
-    const snapshot =
-        await getDocs(collection(db, 'players'));
+        players = {};
 
-    snapshot.forEach(docSnap => {
+        const snapshot =
+            await getDocs(
+                collection(db, 'players')
+            );
 
-        players[docSnap.id] = {
+        snapshot.forEach(docSnap => {
 
-            id: docSnap.id,
+            players[docSnap.id] = {
 
-            ...docSnap.data()
-        };
-    });
+                id: docSnap.id,
 
-    console.log('PLAYERS:', players);
+                ...docSnap.data()
+            };
+        });
 
-    renderPlayerCards();
+        renderPlayerCards();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert(
+            'You are not authorized to access this app.'
+        );
+
+        await signOut(auth);
+    }
 }
 
 // =========================
@@ -187,8 +382,6 @@ function listenForRounds() {
                 });
             });
 
-            console.log('ROUNDS:', rounds);
-
             updateTable();
 
             renderPlayerCards();
@@ -202,34 +395,30 @@ function listenForRounds() {
 
 function renderPlayerCards() {
 
-    playerCards.innerHTML = '';
+    const playerCards =
+        document.getElementById(
+            'player-cards'
+        );
 
-    if (
-        !players ||
-        Object.keys(players).length === 0
-    ) {
-        return;
-    }
+    if (!playerCards) return;
+
+    playerCards.innerHTML = '';
 
     Object.values(players).forEach(player => {
 
-        const playerRounds = rounds.filter(round =>
-            round &&
-            round.name === player.id
-        );
+        const playerRounds =
+            rounds.filter(round =>
+                round.name === player.id
+            );
 
-        const used = playerRounds.reduce(
-            (sum, round) => {
-
-                const holes =
-                    parseInt(round.holes);
-
-                return sum +
-                    (isNaN(holes) ? 0 : holes);
-
-            },
-            0
-        );
+        const used =
+            playerRounds.reduce(
+                (sum, round) =>
+                    sum + (
+                        parseInt(round.holes) || 0
+                    ),
+                0
+            );
 
         const totalHoles =
             parseInt(player.totalHoles) || 180;
@@ -248,7 +437,10 @@ function renderPlayerCards() {
         card.className = 'stat-card';
 
         card.innerHTML = `
-            <div class="flex items-start justify-between">
+
+            <div
+                class="flex items-start justify-between"
+            >
 
                 <div>
 
@@ -256,11 +448,15 @@ function renderPlayerCards() {
                         ${player.id} Remaining
                     </div>
 
-                    <div class="stat-number text-green-400">
+                    <div
+                        class="stat-number text-green-400"
+                    >
                         ${remaining}
                     </div>
 
-                    <div class="text-sm text-gray-400 mt-1">
+                    <div
+                        class="text-sm text-gray-400 mt-1"
+                    >
                         ${used} / ${totalHoles} used
                     </div>
 
@@ -327,18 +523,26 @@ function renderPlayerCards() {
 }
 
 // =========================
-// TABLE
+// UPDATE TABLE
 // =========================
 
 function updateTable() {
 
+    const roundsTableBody =
+        document.getElementById(
+            'rounds-table-body'
+        );
+
+    if (!roundsTableBody) return;
+
     roundsTableBody.innerHTML = '';
 
-    const sorted = [...rounds].sort(
-        (a, b) =>
-            getTimestampValue(b.date) -
-            getTimestampValue(a.date)
-    );
+    const sorted =
+        [...rounds].sort(
+            (a, b) =>
+                getTimestampValue(b.date) -
+                getTimestampValue(a.date)
+        );
 
     sorted.forEach(round => {
 
@@ -346,15 +550,18 @@ function updateTable() {
             document.createElement('tr');
 
         row.innerHTML = `
-            <td>${round.name || '-'}</td>
+
+            <td>${round.name}</td>
 
             <td>
                 ${formatDate(round.date)}
             </td>
 
-            <td>${round.holes || 0}</td>
+            <td>${round.holes}</td>
 
-            <td>${round.comments || '-'}</td>
+            <td>
+                ${round.comments || '-'}
+            </td>
 
             <td>
 
@@ -401,14 +608,6 @@ function bindActionButtons() {
 
                     const id =
                         btn.dataset.id;
-
-                    if (
-                        !confirm(
-                            'Delete this round?'
-                        )
-                    ) {
-                        return;
-                    }
 
                     await deleteDoc(
                         doc(db, 'rounds', id)
@@ -460,59 +659,56 @@ function bindActionButtons() {
 // ADD ROUND
 // =========================
 
-addRoundButton.addEventListener(
-    'click',
-    async () => {
+async function addRound() {
 
-        const name =
-            document.getElementById('name').value;
+    const name =
+        document.getElementById('name').value;
 
-        const date =
-            document.getElementById('date').value;
+    const date =
+        document.getElementById('date').value;
 
-        const holes = parseInt(
-            document.getElementById('holes').value
+    const holes = parseInt(
+        document.getElementById('holes').value
+    );
+
+    const comments =
+        document.getElementById('comments').value;
+
+    if (
+        !name ||
+        !date ||
+        isNaN(holes)
+    ) {
+
+        alert(
+            'Please complete all fields'
         );
 
-        const comments =
-            document.getElementById('comments').value;
-
-        if (
-            !name ||
-            !date ||
-            isNaN(holes)
-        ) {
-
-            alert(
-                'Please complete all fields'
-            );
-
-            return;
-        }
-
-        await addDoc(
-            collection(db, 'rounds'),
-            {
-
-                name,
-
-                date: Timestamp.fromDate(
-                    new Date(date)
-                ),
-
-                holes,
-
-                comments
-            }
-        );
-
-        document.getElementById('holes').value =
-            '';
-
-        document.getElementById('comments').value =
-            '';
+        return;
     }
-);
+
+    await addDoc(
+        collection(db, 'rounds'),
+        {
+
+            name,
+
+            date: Timestamp.fromDate(
+                new Date(date)
+            ),
+
+            holes,
+
+            comments
+        }
+    );
+
+    document.getElementById('holes').value =
+        '';
+
+    document.getElementById('comments').value =
+        '';
+}
 
 // =========================
 // DATE HELPERS
@@ -551,12 +747,7 @@ function formatDate(dateValue) {
                 }
             );
 
-    } catch (err) {
-
-        console.error(
-            'Date formatting error:',
-            err
-        );
+    } catch {
 
         return '-';
     }
