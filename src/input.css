@@ -213,6 +213,8 @@ label {
 
     width: 100%;
 
+    min-width: 0;
+
     height: 56px;
 
     padding: 0 18px;
@@ -231,6 +233,12 @@ label {
     font-size: 1rem;
 
     outline: none;
+
+    appearance: none;
+
+    -webkit-appearance: none;
+
+    box-sizing: border-box;
 
     transition:
         border-color 0.2s ease,
@@ -465,4 +473,29 @@ select.input option {
     background: #1e293b;
 
     color: #f8fafc;
+}
+
+/* =========================
+   MOBILE TABLE
+========================= */
+
+@media (max-width: 768px) {
+
+    .table-base {
+
+        min-width: 700px;
+    }
+
+    .table-shell {
+
+        overflow-x: auto;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-base thead th,
+    .table-base tbody td {
+
+        white-space: nowrap;
+    }
 }

@@ -399,6 +399,7 @@ label {
 }
 .input {
   width: 100%;
+  min-width: 0;
   height: 56px;
   padding: 0 18px;
   border-radius: 16px;
@@ -407,6 +408,9 @@ label {
   color: white;
   font-size: 1rem;
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 .input:focus {
@@ -509,6 +513,18 @@ select.input {
 select.input option {
   background: #1e293b;
   color: #f8fafc;
+}
+@media (max-width: 768px) {
+  .table-base {
+    min-width: 700px;
+  }
+  .table-shell {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-base thead th, .table-base tbody td {
+    white-space: nowrap;
+  }
 }
 @property --tw-border-style {
   syntax: "*";
