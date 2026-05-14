@@ -147,6 +147,9 @@ function renderApp(user) {
                         gap-3
                         sm:flex-row
                         sm:items-center
+                        min-w-0
+                        w-full
+                        md:w-auto
                     "
                 >
                     <div
@@ -154,11 +157,12 @@ function renderApp(user) {
                             text-sm
                             text-gray-400
                             break-all
+                            max-w-full
+                            min-w-0
                         "
                     >
                         ${user.email}
                     </div>
-
                     <button
                         id="logout-btn"
                         class="action-btn"
