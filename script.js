@@ -687,6 +687,12 @@ async function addRound() {
         return;
     }
 
+    const [year, month, day] =
+        date.split('-').map(Number);
+
+    const localDate =
+        new Date(year, month - 1, day);
+
     await addDoc(
         collection(db, 'rounds'),
         {
@@ -694,7 +700,7 @@ async function addRound() {
             name,
 
             date: Timestamp.fromDate(
-                new Date(date)
+                localDate
             ),
 
             holes,
